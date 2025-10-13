@@ -5,7 +5,7 @@ from socket_registry import SocketRegistry
 
 HOST = "127.0.0.1"
 PORT = 65432
-registry = SocketRegistry
+registry = SocketRegistry()
 
 def main():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -28,12 +28,11 @@ def handle_client(conn: socket, addr):
                 break
             print(f"Recieved from {addr}: {data.decode()}")
             conn.sendall(f"Server response: {data.decode()}".encode())
+            message = f"[{conn.getpeername()}] {data.decode()}".encode()
+            registry.broadcast(message)
         except ConnectionResetError:
             print(f"Client {addr} disconnected")
             break
-        finally:
-            registry.unregister(conn)
-            conn.close()
 
 def stop_server():
     print("Server is stopping...")
